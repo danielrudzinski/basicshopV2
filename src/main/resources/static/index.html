@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Shop</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="loading-screen" id="loading-screen">
+    <div class="spinner"></div>
+</div>
+
+<nav>
+    <div class="nav-container">
+        <div class="logo">
+            <i class="fas fa-store"></i>
+            <h1>Modern Shop</h1>
+        </div>
+        <div class="nav-buttons">
+            <button onclick="showProducts()" class="nav-btn">
+                <i class="fas fa-tags"></i>
+                <span>Produkty</span>
+            </button>
+            <button onclick="showCart()" class="nav-btn cart-btn">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Koszyk</span>
+                <span class="cart-badge" id="cart-count">0</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<main>
+    <div class="container">
+        <div id="products-container" class="products-grid">
+            <div class="skeleton-loader">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+        </div>
+
+        <div id="cart-container" class="cart-container hidden">
+            <div class="cart-header">
+                <h2><i class="fas fa-shopping-basket"></i> Twój koszyk</h2>
+            </div>
+            <div id="cart-items"></div>
+            <div id="cart-summary">
+                <div class="summary-details">
+                    <p>Podsumowanie:</p>
+                    <div class="total">
+                        <span>Suma:</span>
+                        <span id="cart-total">0</span> zł
+                    </div>
+                </div>
+                <button onclick="placeOrder()" class="order-button">
+                    <i class="fas fa-check"></i>
+                    Złóż zamówienie
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="notification" id="notification">
+    <i class="fas fa-check-circle"></i>
+    <span id="notification-message"></span>
+</div>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2024 Modern Shop. Wszystkie prawa zastrzeżone.</p>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
