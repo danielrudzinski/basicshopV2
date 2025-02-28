@@ -10,7 +10,9 @@ import pl.myproject.basicshop.dto.ProductsDTO;
 import pl.myproject.basicshop.dto.UsersDTO;
 import pl.myproject.basicshop.mapper.ProductsMapper;
 import pl.myproject.basicshop.model.Products;
+import pl.myproject.basicshop.model.ProductsImages;
 import pl.myproject.basicshop.model.Users;
+import pl.myproject.basicshop.repository.ProductsImagesRepository;
 import pl.myproject.basicshop.repository.ProductsRepository;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public class ProductsService {
     private final ProductsRepository productsRepository;
     private final ProductsMapper productsMapper;
 
-    public ProductsService(ProductsRepository productsRepository, ProductsMapper productsMapper) {
+    public ProductsService(ProductsRepository productsRepository, ProductsImagesRepository productsImagesRepository, ProductsMapper productsMapper) {
         this.productsRepository = productsRepository;
         this.productsMapper = productsMapper;
     }
@@ -52,6 +54,7 @@ public class ProductsService {
                 .buildAndExpand(savedProducts.getId());
         return ResponseEntity.created(uriComponents.toUri()).build();
     }
+
     public ResponseEntity<Void>deleteProducts(@PathVariable Integer id ){
         if(!productsRepository.existsById(id)){
             return ResponseEntity.notFound().build();
