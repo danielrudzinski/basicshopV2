@@ -41,6 +41,9 @@ async function loadProducts() {
     try {
         loadingScreen.style.display = 'flex';
         const response = await fetch('http://localhost:8080/products');
+        if (!response.ok) {
+            throw new Error('Błąd podczas ładowania produktów');
+        }
         products = await response.json();
         displayProducts();
     } catch (error) {
@@ -154,73 +157,73 @@ async function placeOrder() {
 
     try {
         // Tworzenie zamówienia
-        const orderResponse = await fetch('http://localhost:8080/orders', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                users: {
-                    id: 1 // Tymczasowo hardcodowany ID użytkownika
-                }
-            })
-        });
+        const orderId = await createOrder();
 
-        const responseText = await orderResponse.text();
-        if (!orderResponse.ok) {
-            throw new Error(`Błąd podczas tworzenia zamówienia: ${responseText}`);
-        }
-
-        // Odczytanie ID zamówienia
-        let orderId;
-        const locationHeader = orderResponse.headers.get('Location');
-        if (locationHeader) {
-            orderId = locationHeader.split('/').pop();
-        } else {
-            throw new Error('Brak Location header w odpowiedzi');
-        }
-
-        // Dodawanie produktów do zamówienia
+        // Dodawanie produktów do zamówienia i aktualizacja stanu magazynowego
         for (const item of cart) {
-            const orderItemResponse = await fetch('http://localhost:8080/orderItems', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    orders: { id: orderId },
-                    products: { id: item.id },
-                    quantity: item.quantity
-                })
-            });
-
-            if (!orderItemResponse.ok) {
-                throw new Error('Błąd podczas dodawania produktu do zamówienia');
-            }
-
-            // Aktualizacja stanu magazynowego
-            const updateStockResponse = await fetch(`http://localhost:8080/products/${item.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    stock: item.stock - item.quantity // Zmniejszenie ilości w magazynie
-                })
-            });
-
-            if (!updateStockResponse.ok) {
-                throw new Error('Błąd podczas aktualizacji stanu magazynowego');
-            }
+            await addOrderItem(orderId, item);
+            await updateStock(item);
         }
 
-        cart = []; // Pusty koszyk po złożeniu zamówienia
+        // Czyszczenie koszyka po złożeniu zamówienia
+        cart = [];
         updateCartDisplay();
         updateCartBadge();
         showNotification('Zamówienie zostało złożone pomyślnie!');
         showProducts();
     } catch (error) {
         showNotification(`Nie udało się złożyć zamówienia: ${error.message}`);
+    }
+}
+
+// Funkcja do tworzenia zamówienia
+async function createOrder() {
+    const orderResponse = await fetch('http://localhost:8080/orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            users: { id: 1 } // Tymczasowo hardcodowany ID użytkownika
+        })
+    });
+    if (!orderResponse.ok) {
+        const errorMessage = await orderResponse.text();
+        throw new Error(`Błąd podczas tworzenia zamówienia: ${errorMessage}`);
+    }
+
+    const locationHeader = orderResponse.headers.get('Location');
+    const orderId = locationHeader.split('/').pop();
+    return orderId;
+}
+
+// Funkcja do dodawania pozycji do zamówienia
+async function addOrderItem(orderId, item) {
+    const orderItemResponse = await fetch('http://localhost:8080/orderItems', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            orders: { id: orderId },
+            products: { id: item.id },
+            quantity: item.quantity
+        })
+    });
+    if (!orderItemResponse.ok) {
+        throw new Error('Błąd podczas dodawania produktu do zamówienia');
+    }
+}
+
+// Funkcja do aktualizacji stanu magazynowego
+async function updateStock(item) {
+    const updateStockResponse = await fetch(`http://localhost:8080/products/${item.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            stock: item.stock - item.quantity
+        })
+    });
+    if (!updateStockResponse.ok) {
+        throw new Error('Błąd podczas aktualizacji stanu magazynowego');
     }
 }
 

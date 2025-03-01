@@ -7,24 +7,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import pl.myproject.basicshop.dto.ProductsDTO;
-import pl.myproject.basicshop.dto.UsersDTO;
 import pl.myproject.basicshop.mapper.ProductsMapper;
 import pl.myproject.basicshop.model.Products;
-import pl.myproject.basicshop.model.ProductsImages;
-import pl.myproject.basicshop.model.Users;
-import pl.myproject.basicshop.repository.ProductsImagesRepository;
 import pl.myproject.basicshop.repository.ProductsRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class ProductsService {
     private final ProductsRepository productsRepository;
     private final ProductsMapper productsMapper;
 
-    public ProductsService(ProductsRepository productsRepository, ProductsImagesRepository productsImagesRepository, ProductsMapper productsMapper) {
+    public ProductsService(ProductsRepository productsRepository, ProductsMapper productsMapper) {
         this.productsRepository = productsRepository;
         this.productsMapper = productsMapper;
     }

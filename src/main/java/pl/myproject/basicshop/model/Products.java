@@ -19,8 +19,6 @@ public class Products {
     public Products() {
     }
 
-    @OneToMany(mappedBy = "products")
-    List<ProductsImages> images;
 
     @OneToMany(mappedBy = "products")
 
@@ -65,11 +63,5 @@ public class Products {
         this.stock = stock;
     }
 
-    public List<ProductsImages> getImages() {
-        return images;
-    }
 
-    public void setImages(List<ProductsImages> images) {
-        this.images = images;
-    }
 }
