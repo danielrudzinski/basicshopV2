@@ -128,25 +128,30 @@ function updateCartDisplay() {
 // Wyświetlanie produktów
 function displayProducts() {
     const container = document.getElementById('products-container');
-    container.innerHTML = '';
+    container.innerHTML = '';  // Czyści kontener przed wyświetleniem nowych produktów
 
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.innerHTML = `
-            <div class="product-content">
-                <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
-                <p class="product-price">${formatPrice(product.price)}</p>
-                <button onclick="addToCart(${product.id})" class="add-to-cart">
-                    <i class="fas fa-shopping-cart"></i>
-                    Dodaj do koszyka
-                </button>
-            </div>
-        `;
+    <div class="product-content">
+        <img src="http://localhost:8080/images/produkt${product.id}.jpg" alt="Obrazek produktu">
+        <h3 class="product-title">${product.name}</h3>
+        <p class="product-description">${product.description}</p>
+        <p class="product-price">${formatPrice(product.price)}</p>
+        <button onclick="addToCart(${product.id})" class="add-to-cart">
+            <i class="fas fa-shopping-cart"></i>
+            Dodaj do koszyka
+        </button>
+    </div>
+`;
+
         container.appendChild(productCard);
     });
+
+
 }
+
 
 // Składanie zamówienia
 async function placeOrder() {
