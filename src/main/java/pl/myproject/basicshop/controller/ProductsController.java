@@ -1,6 +1,7 @@
 package pl.myproject.basicshop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.myproject.basicshop.dto.ProductsDTO;
@@ -10,36 +11,48 @@ import pl.myproject.basicshop.service.ProductsService;
 import java.util.List;
 
 @RestController
+@RequestMapping("/products")
 public class ProductsController {
+    private final ProductsService productsService;
+
     @Autowired
-    private ProductsService productsService;
     public ProductsController(ProductsService productsService) {
         this.productsService = productsService;
     }
-    @GetMapping("products")
+
+    @GetMapping
     public ResponseEntity<List<ProductsDTO>> getAllProducts() {
-        return productsService.getAllProducts();
+        List<ProductsDTO> products = productsService.getAllProducts();
+        return ResponseEntity.ok(products);
     }
-    @GetMapping("products/{id}")
-    public ResponseEntity<ProductsDTO> getUserById(@PathVariable Integer id) {
-        return productsService.getProductsrById(id);
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductsDTO> getProductById(@PathVariable Integer id) {
+        ProductsDTO product = productsService.getProductById(id);
+        return ResponseEntity.ok(product);
     }
-    @PostMapping("products")
+
+    @PostMapping
     public ResponseEntity<Products> addProduct(@RequestBody Products products) {
-        return productsService.addProducts(products);
+        Products savedProduct = productsService.addProducts(products);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
-    @DeleteMapping("products/{id}")
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
-        return productsService.deleteProducts(id);
+        productsService.deleteProducts(id);
+        return ResponseEntity.noContent().build();
     }
-    @PutMapping("products/{id}")
+
+    @PutMapping("/{id}")
     public ResponseEntity<Products> updateProduct(@PathVariable Integer id, @RequestBody Products product) {
-        return productsService.updateProducts(id, product);
+        Products updatedProduct = productsService.updateProducts(id, product);
+        return ResponseEntity.ok(updatedProduct);
     }
 
-    @PatchMapping("products/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Products> patchProduct(@PathVariable Integer id, @RequestBody Products product) {
-        return productsService.patchProducts(id, product);
+        Products patchedProduct = productsService.patchProducts(id, product);
+        return ResponseEntity.ok(patchedProduct);
     }
-
 }

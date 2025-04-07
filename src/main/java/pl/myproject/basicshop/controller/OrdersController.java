@@ -1,6 +1,7 @@
 package pl.myproject.basicshop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.myproject.basicshop.dto.OrdersDTO;
@@ -10,6 +11,7 @@ import pl.myproject.basicshop.service.OrdersService;
 import java.util.List;
 
 @RestController
+@RequestMapping("/orders")
 public class OrdersController {
     private final OrdersService ordersService;
 
@@ -17,30 +19,40 @@ public class OrdersController {
     public OrdersController(OrdersService ordersService) {
         this.ordersService = ordersService;
     }
-    @GetMapping("orders")
+
+    @GetMapping
     public ResponseEntity<List<OrdersDTO>> getAllOrders() {
-       return ordersService.getAllOrders();
+        List<OrdersDTO> orders = ordersService.getAllOrders();
+        return ResponseEntity.ok(orders);
     }
-    @GetMapping("orders/{id}")
+
+    @GetMapping("/{id}")
     public ResponseEntity<OrdersDTO> getOrderById(@PathVariable int id) {
-        return ordersService.getOrderById(id);
+        OrdersDTO order = ordersService.getOrderById(id);
+        return ResponseEntity.ok(order);
     }
-    @PostMapping("orders")
-    public ResponseEntity<Orders>addOrder(@RequestBody Orders orders) {
-        return ordersService.addOrders(orders);
+
+    @PostMapping
+    public ResponseEntity<Orders> addOrder(@RequestBody Orders orders) {
+        Orders savedOrder = ordersService.addOrders(orders);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
     }
-    @DeleteMapping("orders/{id}")
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrders(@PathVariable Integer id) {
-        return ordersService.deleteOrders(id);
+        ordersService.deleteOrders(id);
+        return ResponseEntity.noContent().build();
     }
-    @PutMapping("orders/{id}")
+
+    @PutMapping("/{id}")
     public ResponseEntity<Orders> updateOrders(@PathVariable Integer id, @RequestBody Orders orders) {
-        return ordersService.updateOrder(id, orders);
+        Orders updatedOrder = ordersService.updateOrder(id, orders);
+        return ResponseEntity.ok(updatedOrder);
     }
 
-    @PatchMapping("orders/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Orders> patchOrders(@PathVariable Integer id, @RequestBody Orders orders) {
-        return ordersService.patchOrder(id, orders);
+        Orders patchedOrder = ordersService.patchOrder(id, orders);
+        return ResponseEntity.ok(patchedOrder);
     }
-
 }

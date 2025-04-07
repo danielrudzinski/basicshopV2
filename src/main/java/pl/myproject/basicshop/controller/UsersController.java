@@ -1,6 +1,7 @@
 package pl.myproject.basicshop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.myproject.basicshop.dto.UsersDTO;
@@ -10,38 +11,48 @@ import pl.myproject.basicshop.service.UsersService;
 import java.util.List;
 
 @RestController
+@RequestMapping("/users")
 public class UsersController {
     private final UsersService usersService;
+
     @Autowired
     public UsersController(UsersService usersService) {
         this.usersService = usersService;
     }
 
-    @GetMapping("users")
+    @GetMapping
     public ResponseEntity<List<UsersDTO>> getAllUsers() {
-        return usersService.getAllUsers();
+        List<UsersDTO> users = usersService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
-    @PostMapping("users")
-    public ResponseEntity<Users> addUsers(@RequestBody Users user){
-        return usersService.addUsers(user);
-    }
-    @GetMapping("users/{id}")
+
+    @GetMapping("/{id}")
     public ResponseEntity<UsersDTO> getUserById(@PathVariable Integer id){
-        return usersService.getUserById(id);
+        UsersDTO user = usersService.getUserById(id);
+        return ResponseEntity.ok(user);
     }
-    @DeleteMapping("users/{id}")
+
+    @PostMapping
+    public ResponseEntity<Users> addUsers(@RequestBody Users user){
+        Users savedUser = usersService.addUsers(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+    }
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id){
-        return usersService.deleteUser(id);
+        usersService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
-    @PutMapping("users/{id}")
+
+    @PutMapping("/{id}")
     public ResponseEntity<Users> updateUser(@PathVariable Integer id, @RequestBody Users user){
-        return usersService.updateUser(id, user);
+        Users updatedUser = usersService.updateUser(id, user);
+        return ResponseEntity.ok(updatedUser);
     }
-    @PatchMapping("users/{id}")
+
+    @PatchMapping("/{id}")
     public ResponseEntity<Users> patchUser(@PathVariable Integer id, @RequestBody Users user){
-        return usersService.patchUser(id, user);
+        Users patchedUser = usersService.patchUser(id, user);
+        return ResponseEntity.ok(patchedUser);
     }
-
-
-
 }

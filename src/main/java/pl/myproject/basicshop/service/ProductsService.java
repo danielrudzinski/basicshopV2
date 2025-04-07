@@ -1,11 +1,8 @@
 package pl.myproject.basicshop.service;
 
-import org.springframework.http.ResponseEntity;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponents;
 import pl.myproject.basicshop.dto.ProductsDTO;
 import pl.myproject.basicshop.mapper.ProductsMapper;
 import pl.myproject.basicshop.model.Products;
@@ -14,6 +11,7 @@ import pl.myproject.basicshop.repository.ProductsRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service
 public class ProductsService {
     private final ProductsRepository productsRepository;
@@ -24,74 +22,61 @@ public class ProductsService {
         this.productsMapper = productsMapper;
     }
 
-
-    public ResponseEntity<List<ProductsDTO>> getAllProducts() {
+    public List<ProductsDTO> getAllProducts() {
         List<ProductsDTO> productsDTOs = productsRepository.findAll().stream()
                 .map(productsMapper::apply)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(productsDTOs);
+        return productsDTOs;
     }
 
-    public ResponseEntity<ProductsDTO> getProductsrById(@PathVariable Integer id) {
+    public ProductsDTO getProductById(Integer id) {
         return productsRepository.findById(id)
-                .map(productsMapper::apply)  // mapujemy Users na UsersDTO
-                .map(ResponseEntity::ok)  // opakowanie w ResponseEntity
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-    public ResponseEntity<Products> addProducts(@RequestBody Products products) {
-        if(isProductInvalid(products)) {
-            return ResponseEntity.badRequest().build();
-        }
-        Products savedProducts = productsRepository.save(products);
-        UriComponents uriComponents = ServletUriComponentsBuilder.
-                fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(savedProducts.getId());
-        return ResponseEntity.created(uriComponents.toUri()).build();
+                .map(productsMapper::apply)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
     }
 
-    public ResponseEntity<Void>deleteProducts(@PathVariable Integer id ){
-        if(!productsRepository.existsById(id)){
-            return ResponseEntity.notFound().build();
+    public Products addProducts(Products products) {
+        if(isProductInvalid(products)) {
+            throw new IllegalArgumentException("Product data is invalid");
+        }
+        return productsRepository.save(products);
+    }
+
+    public void deleteProducts(Integer id) {
+        if(!productsRepository.existsById(id)) {
+            throw new EntityNotFoundException("Product not found with id: " + id);
         }
 
         productsRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
-
-    }
-    public ResponseEntity<Products> updateProducts(@PathVariable Integer id, @RequestBody Products updatedProduct) {
-        return productsRepository.findById(id)
-                .map(existingProduct -> {
-                    existingProduct.setName(updatedProduct.getName());
-                    existingProduct.setDescription(updatedProduct.getDescription());
-                    existingProduct.setPrice(updatedProduct.getPrice());
-                    existingProduct.setStock(updatedProduct.getStock());
-
-                    return productsRepository.save(existingProduct);
-                })
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<Products> patchProducts(@PathVariable Integer id, @RequestBody Products updatedProduct) {
-        return productsRepository.findById(id)
-                .map(existingProduct -> {
-                    if (updatedProduct.getName() != null) existingProduct.setName(updatedProduct.getName());
-                    if (updatedProduct.getDescription() != null) existingProduct.setDescription(updatedProduct.getDescription());
-                    if (updatedProduct.getPrice() != null) existingProduct.setPrice(updatedProduct.getPrice());
-                    if (updatedProduct.getStock() != null) existingProduct.setStock(updatedProduct.getStock());
+    public Products updateProducts(Integer id, Products updatedProduct) {
+        Products existingProduct = productsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 
-                    return productsRepository.save(existingProduct);
-                })
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        existingProduct.setName(updatedProduct.getName());
+        existingProduct.setDescription(updatedProduct.getDescription());
+        existingProduct.setPrice(updatedProduct.getPrice());
+        existingProduct.setStock(updatedProduct.getStock());
+
+        return productsRepository.save(existingProduct);
     }
+
+    public Products patchProducts(Integer id, Products updatedProduct) {
+        Products existingProduct = productsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+
+        if (updatedProduct.getName() != null) existingProduct.setName(updatedProduct.getName());
+        if (updatedProduct.getDescription() != null) existingProduct.setDescription(updatedProduct.getDescription());
+        if (updatedProduct.getPrice() != null) existingProduct.setPrice(updatedProduct.getPrice());
+        if (updatedProduct.getStock() != null) existingProduct.setStock(updatedProduct.getStock());
+
+        return productsRepository.save(existingProduct);
+    }
+
     private boolean isProductInvalid(Products products) {
-        return products.getName()== null || products.getName().isEmpty()||
+        return products.getName() == null || products.getName().isEmpty() ||
                 products.getPrice() == null || products.getPrice() <= 0 ||
                 products.getStock() == null || products.getStock() <= 0;
     }
-
-
-
 }
