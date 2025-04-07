@@ -33,7 +33,7 @@ Projekt jest w trakcie aktywnego rozwoju. Na ten moment dostępne są podstawowe
 
 1. Sklonuj repozytorium:
    ```bash
-   git clone https://github.com/twoj-user/twoj-repo.git
+   git clone https://github.com/danielrudzinski/basicshopV2.git
    ```
 2. Skonfiguruj połączenie z PostgreSQL w pliku `application.properties`:
    ```properties
