@@ -148,10 +148,7 @@ function displayProducts() {
 
         container.appendChild(productCard);
     });
-
-
 }
-
 
 // Składanie zamówienia
 async function placeOrder() {
@@ -192,12 +189,25 @@ async function createOrder() {
             users: { id: 1 } // Tymczasowo hardcodowany ID użytkownika
         })
     });
+
     if (!orderResponse.ok) {
         const errorMessage = await orderResponse.text();
         throw new Error(`Błąd podczas tworzenia zamówienia: ${errorMessage}`);
     }
 
+    // Sprawdź czy Location header istnieje
     const locationHeader = orderResponse.headers.get('Location');
+    if (!locationHeader) {
+        // Jeśli brak Location header, spróbuj pobrać ID z ciała odpowiedzi
+        try {
+            const orderData = await orderResponse.json();
+            return orderData.id; // Zakładając, że odpowiedź zawiera ID
+        } catch (error) {
+            throw new Error('Brak identyfikatora zamówienia w odpowiedzi');
+        }
+    }
+
+    // Jeśli Location header istnieje, wyciągnij ID jak wcześniej
     const orderId = locationHeader.split('/').pop();
     return orderId;
 }
